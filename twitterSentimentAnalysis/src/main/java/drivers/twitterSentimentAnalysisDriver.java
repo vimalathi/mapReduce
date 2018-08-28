@@ -27,9 +27,10 @@ public class twitterSentimentAnalysisDriver extends Configured implements Tool {
             System.err.println("Usage: Parse <in><out>");
         }
         Configuration conf = new Configuration(getConf());
-        DistributedCache.addCacheFile(new URI("/AFINN.txt"), conf);
         Job job = Job.getInstance(conf, "sentiment analysis on twitter data");
         job.setJarByClass(getClass());
+        //DistributedCache.addCacheFile(new URI("/AFINN.txt"), conf);
+        job.addCacheFile(new URI("/AFINN.txt"));
 
         FileInputFormat.setInputPaths(job, new Path(args[0]));
         FileOutputFormat.setOutputPath(job, new Path(args[1]));

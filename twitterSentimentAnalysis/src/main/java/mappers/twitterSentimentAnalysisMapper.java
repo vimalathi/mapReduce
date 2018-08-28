@@ -1,11 +1,13 @@
 package mappers;
 
 import jdk.nashorn.internal.parser.JSONParser;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.filecache.DistributedCache;
 import org.codehaus.jettison.json.JSONObject;
@@ -20,16 +22,22 @@ import java.util.HashMap;
 
 
 public class twitterSentimentAnalysisMapper extends Mapper<LongWritable, Text, Text, Text> {
+    private Configuration conf;
     private URI[] files;
-    //private String url = "/AFINN.txt";
+    //private URI[] url = ("/AFINN.txt");
     private HashMap<String, String> Affinn_map = new HashMap<String, String>();
-
+//    public void configure(Job job){
+//        //files = job.addCacheFile(job.getConfiguration());
+//        job.setCacheFiles(new URI[]);
+//    }
     public void setup(Mapper.Context context) throws IOException {
+        conf = context.getConfiguration();
         //files = DistributedCache.addFileToClassPath(new Path("/"), context.getConfiguration());
-        files = DistributedCache.addCacheFile(new URI("/AFINN.txt"), context.getConfiguration());
+        //files = DistributedCache.addCacheFile(new URI("/AFINN.txt"), context.getConfiguration());
+        files = Job.getInstance(conf).getCacheFiles();
         System.out.println("files: " + files);
-        Path path = new Path(files[0]);
-        FileSystem fs = new FileSystem.get(context.getConfiguration());
+        Path path = new Path(files[0].getPath());
+        FileSystem fs = FileSystem.get(files[0], conf);
         FSDataInputStream in = fs.open(path);
         BufferedReader br = new BufferedReader(new InputStreamReader(in));
         String line = "";
